@@ -162,17 +162,15 @@ class ICAModel(nn.Module):
         x = x.to(self.device)
         cond = cond.to(self.device)
 
+        code = self.encoder(x, cond)
+        logits = self.discriminator(code)
+        discriminator_loss = self.disc_loss_func(logits, cond)
+        
         if batch_idx % self.cfg.discriminator.opt_interval == 0:
             self.discriminator.zero_grad()
-            code = self.encoder(x, cond)
-            logits = self.discriminator(code)
-            discriminator_loss = self.disc_loss_func(logits, cond)
             discriminator_loss.backward()
             self.disc_optim.step()
 
-        if batch_idx % self.cfg.autoencoder.opt_interval == 0:
-            self.encoder.zero_grad()
-            self.decoder.zero_grad()
             code = self.encoder(x, cond)
             recon = self.decoder(code, cond)
             logits = self.discriminator(code)
@@ -180,6 +178,10 @@ class ICAModel(nn.Module):
             recon_loss = self.recon_loss_func(recon, x)
             indep_loss = - discriminator_loss
             ae_loss = recon_loss + self.beta * indep_loss
+        
+        if batch_idx % self.cfg.autoencoder.opt_interval == 0:
+            self.encoder.zero_grad()
+            self.decoder.zero_grad()
             ae_loss.backward()
             self.ae_optim.step()
 

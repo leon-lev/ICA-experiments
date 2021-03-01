@@ -37,18 +37,18 @@ def parse_opts():
     return cfg
 
 
-# if __name__ == '__main__':
-cfg = parse_opts()
-logging.info(f'Training arguments:\n{cfg}')
+if __name__ == '__main__':
+    cfg = parse_opts()
+    logging.info(f'Training arguments:\n{cfg}')
 
-train_loader, train_dataset, class_counts = get_loader(cfg, 'train')
-class_weights = np.array(class_counts) / sum(class_counts)
-val_loader, val_dataset, _ = get_loader(cfg, 'val')
+    train_loader, train_dataset, class_counts = get_loader(cfg, 'train')
+    class_weights = np.array(class_counts) / sum(class_counts)
+    val_loader, val_dataset, _ = get_loader(cfg, 'val')
 
-encoder, decoder, discriminator = initialize_models(cfg)
-validate_models(encoder, decoder, discriminator, cfg)
-logging.info('Model initialization')
-model = ICAModel(encoder, decoder, discriminator, cfg)
-logging.info('Training ... ')
-model.train(train_loader, val_loader, cfg.n_epochs, vis_dataset=val_dataset)
-logging.info('Done')
+    encoder, decoder, discriminator = initialize_models(cfg)
+    validate_models(encoder, decoder, discriminator, cfg)
+    logging.info('Model initialization')
+    model = ICAModel(encoder, decoder, discriminator, cfg)
+    logging.info('Training ... ')
+    model.train(train_loader, val_loader, cfg.n_epochs, vis_dataset=val_dataset)
+    logging.info('Done')
